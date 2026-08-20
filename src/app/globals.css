@@ -1,0 +1,247 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   FLAXTORE DESIGN TOKENS
+   Derived from the Flaxtore mark (deep botanical green, sampled ~#31402F)
+   plus a warm, editorial neutral system. Single source of truth for color,
+   type, spacing, radius, shadow, motion and z-index across the site.
+   ========================================================================== */
+
+:root {
+  /* ---- Brand green scale (derived from logo sampling) ---- */
+  --brand-950: #10160d;
+  --brand-900: #172012;
+  --brand-800: #1f2b19;
+  --brand-700: #283622;
+  --brand-600: #33422b;
+  --brand-500: #3f5233;
+  --brand-400: #56693f;
+  --brand-300: #7c9163;
+  --brand-200: #aabd8f;
+  --brand-100: #d1ddbd;
+  --brand-50: #eef2e6;
+
+  /* ---- Warm neutrals ---- */
+  --cream: #f6f0e2;
+  --ivory: #fbf8f1;
+  --surface: #ffffff;
+  --sand: #ece3cd;
+
+  /* ---- Ink / text ---- */
+  --ink: #1c1a13;
+  --ink-soft: #322d22;
+  --ink-muted: #6b6353;
+  --ink-faint: #9a9280;
+
+  /* ---- Structural ---- */
+  --border: #e2d9c2;
+  --border-strong: #cabf9e;
+
+  /* ---- Accent (warm, roasted / packaging-derived) ---- */
+  --accent: #b97a3d;
+  --accent-dark: #8f5c2a;
+  --accent-light: #e3be8a;
+
+  /* ---- Flavour accents (sampled from approved packaging artwork) ---- */
+  --flavour-classic: #896440;
+  --flavour-salt: #ab7d70;
+  --flavour-peri: #c5603f;
+
+  /* ---- Radius ---- */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 32px;
+  --radius-pill: 999px;
+
+  /* ---- Shadow ---- */
+  --shadow-sm: 0 1px 2px rgba(28, 26, 19, 0.06);
+  --shadow-md: 0 8px 24px -8px rgba(28, 26, 19, 0.16);
+  --shadow-lg: 0 24px 64px -16px rgba(23, 32, 18, 0.28);
+  --shadow-brand: 0 12px 32px -8px rgba(31, 43, 25, 0.35);
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 180ms;
+  --duration-base: 420ms;
+  --duration-slow: 800ms;
+
+  /* ---- Layout ---- */
+  --container-max: 1360px;
+  --container-pad: 1.5rem;
+
+  /* ---- Z-index ---- */
+  --z-header: 60;
+  --z-overlay: 70;
+  --z-drawer: 80;
+  --z-toast: 90;
+}
+
+@theme inline {
+  --color-brand-950: var(--brand-950);
+  --color-brand-900: var(--brand-900);
+  --color-brand-800: var(--brand-800);
+  --color-brand-700: var(--brand-700);
+  --color-brand-600: var(--brand-600);
+  --color-brand-500: var(--brand-500);
+  --color-brand-400: var(--brand-400);
+  --color-brand-300: var(--brand-300);
+  --color-brand-200: var(--brand-200);
+  --color-brand-100: var(--brand-100);
+  --color-brand-50: var(--brand-50);
+
+  --color-cream: var(--cream);
+  --color-ivory: var(--ivory);
+  --color-surface: var(--surface);
+  --color-sand: var(--sand);
+
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --color-accent-light: var(--accent-light);
+
+  --color-flavour-classic: var(--flavour-classic);
+  --color-flavour-salt: var(--flavour-salt);
+  --color-flavour-peri: var(--flavour-peri);
+
+  --font-display: var(--font-fraunces);
+  --font-sans: var(--font-manrope);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-pill: var(--radius-pill);
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4,
+.font-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+  letter-spacing: -0.01em;
+  font-weight: 500;
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 18, "WONK" 0;
+}
+
+::selection {
+  background: var(--brand-700);
+  color: var(--ivory);
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   PRIMITIVES
+   ========================================================================== */
+
+.container-flax {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+@media (min-width: 768px) {
+  .container-flax {
+    --container-pad: 2.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container-flax {
+    --container-pad: 3.5rem;
+  }
+}
+
+.text-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 0.98;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}
+
+.hairline {
+  height: 1px;
+  background: var(--border);
+}
+
+.grain {
+  position: relative;
+}
+
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ivory);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--brand-200);
+  border-radius: 999px;
+  border: 3px solid var(--ivory);
+}
