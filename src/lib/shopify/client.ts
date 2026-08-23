@@ -65,7 +65,7 @@ type GraphQLResponse<T> = {
 export async function shopifyFetch<T>(
   query: string,
   variables?: Record<string, unknown>,
-  options?: { revalidate?: number; cache?: RequestCache; tags?: string[] }
+  options?: { revalidate?: number; cache?: RequestCache; tags?: string[]; buyerIp?: string }
 ): Promise<T> {
   const { domain, token, version } = getConfig();
   const url = `https://${domain}/api/${version}/graphql.json`;
@@ -93,6 +93,15 @@ export async function shopifyFetch<T>(
         // before Shopify even evaluates the GraphQL query.
         "Shopify-Storefront-Private-Token": token,
         Accept: "application/json",
+        // Shopify recommends private/server-side Storefront API requests
+        // that result from real buyer traffic (cart mutations, checkout
+        // URL retrieval) include the buyer's IP so Shopify's fraud/risk
+        // analysis at checkout has accurate attribution. Only set when a
+        // caller explicitly passes one (see cart-actions.ts, which derives
+        // it from Vercel's own forwarded-for header — never from an
+        // arbitrary client-supplied value) — catalogue reads have no
+        // buyer request to attribute, so this is omitted for those.
+        ...(options?.buyerIp ? { "Shopify-Storefront-Buyer-IP": options.buyerIp } : {}),
       },
       body: JSON.stringify({ query, variables }),
       ...(options?.cache ? { cache: options.cache } : {}),

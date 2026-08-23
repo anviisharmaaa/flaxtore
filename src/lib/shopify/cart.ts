@@ -24,6 +24,10 @@ import { getLocalContentBySlug } from "@/data/products";
  */
 const NO_STORE = { cache: "no-store" as const };
 
+function withBuyerIp(buyerIp?: string) {
+  return buyerIp ? { ...NO_STORE, buyerIp } : NO_STORE;
+}
+
 function resolveLineWeightLabel(line: ShopifyCart["lines"]["edges"][number]["node"]): string {
   const weightOption = line.merchandise.selectedOptions.find((o) => /weight|size/i.test(o.name));
   if (weightOption?.value) return weightOption.value;
@@ -59,9 +63,10 @@ export function mapShopifyCartToLocal(cart: ShopifyCart): Cart {
 }
 
 export async function shopifyCreateCart(
-  lines?: { merchandiseId: string; quantity: number }[]
+  lines?: { merchandiseId: string; quantity: number }[],
+  buyerIp?: string
 ): Promise<ShopifyCart> {
-  const data = await shopifyFetch<CartCreateResult>(CART_CREATE_MUTATION, { lines }, NO_STORE);
+  const data = await shopifyFetch<CartCreateResult>(CART_CREATE_MUTATION, { lines }, withBuyerIp(buyerIp));
   assertNoUserErrors(data.cartCreate.userErrors, "Could not create cart");
   if (!data.cartCreate.cart) {
     throw new Error("Shopify cartCreate returned no cart.");
@@ -69,16 +74,21 @@ export async function shopifyCreateCart(
   return data.cartCreate.cart;
 }
 
-export async function shopifyGetCart(cartId: string): Promise<ShopifyCart | null> {
-  const data = await shopifyFetch<CartQueryResult>(CART_QUERY, { cartId }, NO_STORE);
+export async function shopifyGetCart(cartId: string, buyerIp?: string): Promise<ShopifyCart | null> {
+  const data = await shopifyFetch<CartQueryResult>(CART_QUERY, { cartId }, withBuyerIp(buyerIp));
   return data.cart;
 }
 
 export async function shopifyAddCartLines(
   cartId: string,
-  lines: { merchandiseId: string; quantity: number }[]
+  lines: { merchandiseId: string; quantity: number }[],
+  buyerIp?: string
 ): Promise<ShopifyCart> {
-  const data = await shopifyFetch<CartLinesAddResult>(CART_LINES_ADD_MUTATION, { cartId, lines }, NO_STORE);
+  const data = await shopifyFetch<CartLinesAddResult>(
+    CART_LINES_ADD_MUTATION,
+    { cartId, lines },
+    withBuyerIp(buyerIp)
+  );
   assertNoUserErrors(data.cartLinesAdd.userErrors, "Could not add item to cart");
   if (!data.cartLinesAdd.cart) {
     throw new Error("Shopify cartLinesAdd returned no cart.");
@@ -88,9 +98,14 @@ export async function shopifyAddCartLines(
 
 export async function shopifyUpdateCartLines(
   cartId: string,
-  lines: { id: string; quantity: number }[]
+  lines: { id: string; quantity: number }[],
+  buyerIp?: string
 ): Promise<ShopifyCart> {
-  const data = await shopifyFetch<CartLinesUpdateResult>(CART_LINES_UPDATE_MUTATION, { cartId, lines }, NO_STORE);
+  const data = await shopifyFetch<CartLinesUpdateResult>(
+    CART_LINES_UPDATE_MUTATION,
+    { cartId, lines },
+    withBuyerIp(buyerIp)
+  );
   assertNoUserErrors(data.cartLinesUpdate.userErrors, "Could not update cart quantity");
   if (!data.cartLinesUpdate.cart) {
     throw new Error("Shopify cartLinesUpdate returned no cart.");
@@ -98,8 +113,16 @@ export async function shopifyUpdateCartLines(
   return data.cartLinesUpdate.cart;
 }
 
-export async function shopifyRemoveCartLines(cartId: string, lineIds: string[]): Promise<ShopifyCart> {
-  const data = await shopifyFetch<CartLinesRemoveResult>(CART_LINES_REMOVE_MUTATION, { cartId, lineIds }, NO_STORE);
+export async function shopifyRemoveCartLines(
+  cartId: string,
+  lineIds: string[],
+  buyerIp?: string
+): Promise<ShopifyCart> {
+  const data = await shopifyFetch<CartLinesRemoveResult>(
+    CART_LINES_REMOVE_MUTATION,
+    { cartId, lineIds },
+    withBuyerIp(buyerIp)
+  );
   assertNoUserErrors(data.cartLinesRemove.userErrors, "Could not remove item from cart");
   if (!data.cartLinesRemove.cart) {
     throw new Error("Shopify cartLinesRemove returned no cart.");
