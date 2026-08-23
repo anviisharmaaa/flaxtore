@@ -92,18 +92,6 @@ export async function getShopifyProducts(): Promise<Product[]> {
     { first: 50 },
     { revalidate: PRODUCTS_REVALIDATE_SECONDS, tags: ["shopify-products"] }
   );
-  // Temporary, safe diagnostic — prints only the handles Shopify's own
-  // Storefront API returned for this query (never tokens/headers). If
-  // this logs 0, the Storefront API itself returned no products for
-  // this store+token — that's a Shopify Admin publishing/channel issue,
-  // not a local editorial-content mapping issue (there'd be nothing to
-  // map). Remove once resolved.
-  console.log(
-    `[shopify] Storefront API "products" query returned ${data.products.edges.length} product(s): ` +
-      (data.products.edges.length > 0
-        ? data.products.edges.map(({ node }) => node.handle).join(", ")
-        : "(none)")
-  );
   return data.products.edges.map(({ node }) => mapShopifyProductToLocal(node));
 }
 
