@@ -7,7 +7,6 @@ import { NutritionPanel } from "@/components/product/NutritionPanel";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { commerce } from "@/lib/commerce";
-import { products as allProducts } from "@/data/products";
 
 /**
  * Pre-rendered at build time via generateStaticParams below (one static
@@ -21,8 +20,17 @@ import { products as allProducts } from "@/data/products";
  */
 export const revalidate = 60;
 
+/**
+ * Reads through the same `commerce` abstraction as every other page
+ * (previously read `src/data/products.ts` directly) — so build-time
+ * static params now come from the real Shopify catalogue once
+ * configured, rather than the local editorial table. `src/data/products.ts`
+ * no longer holds a product list at all; it's local editorial content
+ * keyed by slug (see that file).
+ */
 export async function generateStaticParams() {
-  return allProducts.map((p) => ({ slug: p.slug }));
+  const products = await commerce.getProducts();
+  return products.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata(props: PageProps<"/products/[slug]">): Promise<Metadata> {
@@ -47,7 +55,10 @@ export default async function ProductPage(props: PageProps<"/products/[slug]">) 
 
   if (!product) notFound();
 
-  const related = await commerce.getRelatedProducts(slug);
+  const [related, allFlavours] = await Promise.all([
+    commerce.getRelatedProducts(slug),
+    commerce.getProducts(),
+  ]);
 
   const productJsonLd = {
     "@context": "https://schema.org",
@@ -70,7 +81,7 @@ export default async function ProductPage(props: PageProps<"/products/[slug]">) 
       />
       <Container className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
         <ProductGallery product={product} />
-        <ProductDetails product={product} allFlavours={allProducts} />
+        <ProductDetails product={product} allFlavours={allFlavours} />
       </Container>
 
       <Container className="mt-16 md:mt-24">

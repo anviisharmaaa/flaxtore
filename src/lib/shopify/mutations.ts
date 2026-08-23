@@ -1,0 +1,65 @@
+import { CART_FIELDS } from "./queries";
+
+export const CART_CREATE_MUTATION = /* GraphQL */ `
+  ${CART_FIELDS}
+  mutation CartCreate($lines: [CartLineInput!]) {
+    cartCreate(input: { lines: $lines }) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+        code
+      }
+    }
+  }
+`;
+
+export const CART_LINES_ADD_MUTATION = /* GraphQL */ `
+  ${CART_FIELDS}
+  mutation CartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
+    cartLinesAdd(cartId: $cartId, lines: $lines) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+        code
+      }
+    }
+  }
+`;
+
+export const CART_LINES_UPDATE_MUTATION = /* GraphQL */ `
+  ${CART_FIELDS}
+  mutation CartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
+    cartLinesUpdate(cartId: $cartId, lines: $lines) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+        code
+      }
+    }
+  }
+`;
+
+export const CART_LINES_REMOVE_MUTATION = /* GraphQL */ `
+  ${CART_FIELDS}
+  mutation CartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
+    cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+        code
+      }
+    }
+  }
+`;

@@ -18,6 +18,14 @@ export type Cart = {
   id: string;
   lines: CartLine[];
   subtotal: number;
+  /**
+   * Shopify's hosted checkout URL for this cart. Absent for an empty/
+   * not-yet-created cart (no Shopify cart exists until the first item is
+   * added). The existing Checkout CTA navigates here directly — Shopify
+   * Checkout remains the only checkout implementation; nothing custom is
+   * built in this app.
+   */
+  checkoutUrl?: string;
 };
 
 export type AddLineInput = {

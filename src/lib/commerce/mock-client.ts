@@ -1,26 +1,28 @@
 import type { CommerceClient } from "@/types/commerce";
-import { products, getProductBySlug, getRelatedProducts } from "@/data/products";
+import { mockProducts, getMockProductBySlug, getMockRelatedProducts } from "@/data/mock-products";
 
 /**
- * In-memory commerce client used during development and for the visual
- * frontend build. Mirrors the shape a real Storefront API client would
- * return so swapping in `ShopifyCommerceClient` later requires no UI
- * changes — only the data source behind this interface changes.
+ * In-memory commerce client used only when Shopify isn't configured
+ * (see `src/lib/commerce/index.ts`) — local development / UI work
+ * without live Shopify credentials. Mirrors the shape
+ * `ShopifyCommerceClient` returns so no UI changes are needed when
+ * Shopify is configured; only the data source behind this interface
+ * changes.
  */
 export class MockCommerceClient implements CommerceClient {
   async getProducts() {
-    return products;
+    return mockProducts;
   }
 
   async getProductBySlug(slug: string) {
-    return getProductBySlug(slug);
+    return getMockProductBySlug(slug);
   }
 
   async getFeaturedProducts() {
-    return products.filter((p) => p.featured);
+    return mockProducts.filter((p) => p.featured);
   }
 
   async getRelatedProducts(slug: string) {
-    return getRelatedProducts(slug);
+    return getMockRelatedProducts(slug);
   }
 }

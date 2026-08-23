@@ -32,6 +32,16 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const products = await commerce.getFeaturedProducts();
 
+  // Temporary, safe diagnostic — prints only product count/handles (never
+  // tokens or headers) so a build run against the real store shows
+  // exactly what commerce.getFeaturedProducts() returned to this page.
+  // Remove once the Shopify handle/local-content mapping is confirmed
+  // correct.
+  console.log(
+    `[homepage] getFeaturedProducts() returned ${products.length} product(s): ` +
+      (products.length > 0 ? products.map((p) => p.slug).join(", ") : "(none)")
+  );
+
   return (
     <>
       <Hero />

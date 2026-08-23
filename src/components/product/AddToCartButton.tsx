@@ -13,10 +13,12 @@ export function AddToCartButton({ product, className }: { product: Product; clas
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
 
-  function handleAdd() {
-    addItem(product, quantity);
-    setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 1600);
+  async function handleAdd() {
+    const added = await addItem(product, quantity);
+    if (added) {
+      setJustAdded(true);
+      setTimeout(() => setJustAdded(false), 1600);
+    }
   }
 
   return (

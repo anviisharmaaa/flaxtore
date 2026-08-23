@@ -18,12 +18,23 @@ import { cn } from "@/lib/utils/cn";
  */
 export function FlavourSelector({ products }: { products: Product[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const active = products[activeIndex];
+
+  // Defense in depth: `activeIndex` is clamped into the valid range for
+  // whatever `products` actually is on this render — covers a shorter
+  // list than expected (e.g. 1–2 products instead of 3), not just an
+  // empty one. Callers (currently just FlavourExperience) already avoid
+  // rendering this component with zero products, but this guard keeps a
+  // future caller, or an unexpected empty/short response from the
+  // commerce layer, from crashing on `active.images` below.
+  const safeIndex = products.length > 0 ? Math.min(activeIndex, products.length - 1) : -1;
+  const active = safeIndex >= 0 ? products[safeIndex] : undefined;
 
   function select(index: number) {
     setActiveIndex(index);
     track.selectFlavour(products[index].slug, products[index].flavour);
   }
+
+  if (!active) return null;
 
   return (
     <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
@@ -57,11 +68,11 @@ export function FlavourSelector({ products }: { products: Product[] }) {
             <button
               key={product.slug}
               role="tab"
-              aria-selected={i === activeIndex}
+              aria-selected={i === safeIndex}
               onClick={() => select(i)}
               className={cn(
                 "flex items-center gap-2 rounded-[var(--radius-pill)] border px-4 py-2 text-sm font-medium transition-all duration-300",
-                i === activeIndex
+                i === safeIndex
                   ? "border-transparent bg-brand-800 text-ivory"
                   : "border-border text-ink-muted hover:border-ink/30 hover:text-ink"
               )}

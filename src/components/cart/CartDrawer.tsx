@@ -9,7 +9,8 @@ import { formatPrice } from "@/lib/utils/currency";
 import { track } from "@/lib/analytics";
 
 export function CartDrawer() {
-  const { lines, subtotal, itemCount, isOpen, closeCart, removeItem, updateQuantity } = useCart();
+  const { lines, subtotal, itemCount, checkoutUrl, error, isOpen, closeCart, removeItem, updateQuantity } =
+    useCart();
 
   return (
     <AnimatePresence>
@@ -40,6 +41,15 @@ export function CartDrawer() {
                 <X size={20} />
               </IconButton>
             </div>
+
+            {error ? (
+              <p
+                role="alert"
+                className="mx-6 mt-4 rounded-[var(--radius-md)] bg-accent/10 px-3 py-2 text-xs text-accent-dark"
+              >
+                {error}
+              </p>
+            ) : null}
 
             {lines.length === 0 ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
@@ -74,13 +84,20 @@ export function CartDrawer() {
                   <p className="mb-4 text-xs text-ink-faint">
                     Shipping and taxes calculated at checkout.
                   </p>
-                  <Button
-                    size="lg"
-                    className="w-full"
-                    onClick={() => track.beginCheckout(subtotal, itemCount)}
-                  >
-                    Checkout
-                  </Button>
+                  {checkoutUrl ? (
+                    <Button
+                      size="lg"
+                      className="w-full"
+                      href={checkoutUrl}
+                      onClick={() => track.beginCheckout(subtotal, itemCount)}
+                    >
+                      Checkout
+                    </Button>
+                  ) : (
+                    <Button size="lg" className="w-full" disabled>
+                      Checkout
+                    </Button>
+                  )}
                 </div>
               </>
             )}
