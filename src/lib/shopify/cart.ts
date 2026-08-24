@@ -75,6 +75,23 @@ function mapShopifyLine(node: ShopifyCart["lines"]["edges"][number]["node"]): Ca
  */
 function resolveCheckoutUrl(rawCheckoutUrl: string): string {
   const configured = process.env.SHOPIFY_CHECKOUT_DOMAIN;
+
+  // Temporary, safe diagnostic — hostnames only, never the cart token or
+  // any query string (the `key=` value included). Confirms, on every
+  // real request, whether this code path runs at all in this
+  // deployment, whether SHOPIFY_CHECKOUT_DOMAIN is visible to it, and
+  // what host the rewrite actually produced. Remove once confirmed.
+  let rawHost = "(unparseable)";
+  try {
+    rawHost = new URL(rawCheckoutUrl).host;
+  } catch {
+    // leave as "(unparseable)"
+  }
+  console.log(
+    `[checkout] SHOPIFY_CHECKOUT_DOMAIN env var: ${configured ? `"${configured}"` : "(not set)"} | ` +
+      `Shopify returned host: "${rawHost}"`
+  );
+
   if (!configured) return rawCheckoutUrl;
 
   const checkoutDomain = configured.replace(/^https?:\/\//, "").replace(/\/+$/, "");
@@ -82,10 +99,12 @@ function resolveCheckoutUrl(rawCheckoutUrl: string): string {
   try {
     const url = new URL(rawCheckoutUrl);
     url.host = checkoutDomain;
+    console.log(`[checkout] resolved host: "${url.host}"`);
     return url.toString();
   } catch {
     // Malformed URL from Shopify (shouldn't happen) — fail safe by
     // passing through exactly what Shopify sent rather than throwing.
+    console.log(`[checkout] resolveCheckoutUrl: rawCheckoutUrl was not a parseable URL, passed through unchanged`);
     return rawCheckoutUrl;
   }
 }
