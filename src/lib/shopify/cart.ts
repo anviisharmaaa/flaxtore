@@ -53,10 +53,47 @@ function mapShopifyLine(node: ShopifyCart["lines"]["edges"][number]["node"]): Ca
   };
 }
 
+/**
+ * Shopify's Cart API returns `checkoutUrl` hosted on whatever domain is
+ * set as this shop's connected/primary domain in Shopify Admin →
+ * Settings → Domains — for this project, historically `flaxtore.com`.
+ * That domain's DNS is now intentionally pointed at this Vercel
+ * deployment instead of Shopify, so a raw `checkoutUrl` resolves to
+ * `.../cart/c/<token>` on the Vercel app itself, which has no such
+ * route and 404s. Shopify's checkout is reachable at the dedicated
+ * `checkout.flaxtore.com` subdomain connected to this store instead.
+ *
+ * Every domain connected to a Shopify store routes to the same
+ * checkout backend, so swapping just the *host* of Shopify's own
+ * checkoutUrl — while leaving its path and query (including the `key=`
+ * parameter some cart tokens carry) byte-for-byte as Shopify generated
+ * them — is sufficient and doesn't require guessing or reconstructing
+ * anything about the cart itself. Configured via `SHOPIFY_CHECKOUT_DOMAIN`
+ * so nothing is hardcoded here; if that env var isn't set, `checkoutUrl`
+ * passes through completely unchanged (today's behavior), so this is a
+ * no-op until the var is added.
+ */
+function resolveCheckoutUrl(rawCheckoutUrl: string): string {
+  const configured = process.env.SHOPIFY_CHECKOUT_DOMAIN;
+  if (!configured) return rawCheckoutUrl;
+
+  const checkoutDomain = configured.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+
+  try {
+    const url = new URL(rawCheckoutUrl);
+    url.host = checkoutDomain;
+    return url.toString();
+  } catch {
+    // Malformed URL from Shopify (shouldn't happen) — fail safe by
+    // passing through exactly what Shopify sent rather than throwing.
+    return rawCheckoutUrl;
+  }
+}
+
 export function mapShopifyCartToLocal(cart: ShopifyCart): Cart {
   return {
     id: cart.id,
-    checkoutUrl: cart.checkoutUrl,
+    checkoutUrl: resolveCheckoutUrl(cart.checkoutUrl),
     subtotal: Number(cart.cost.subtotalAmount.amount),
     lines: cart.lines.edges.map(({ node }) => mapShopifyLine(node)),
   };
