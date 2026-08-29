@@ -159,3 +159,81 @@ export const CART_QUERY = /* GraphQL */ `
 `;
 
 export { CART_FIELDS };
+
+/**
+ * Journal (Shopify Blog/Article) queries. Shopify's Storefront API only
+ * ever returns published articles — there is no draft/unpublished
+ * concept exposed here (that's Admin-API-only), so no extra
+ * published-status filtering is needed to satisfy "only published
+ * articles appear".
+ */
+const ARTICLE_FIELDS = /* GraphQL */ `
+  fragment ArticleFields on Article {
+    id
+    handle
+    title
+    excerpt
+    contentHtml
+    publishedAt
+    authorV2 {
+      name
+    }
+    image {
+      url
+      altText
+      width
+      height
+    }
+    seo {
+      title
+      description
+    }
+    tags
+  }
+`;
+
+export const BLOG_ARTICLES_QUERY = /* GraphQL */ `
+  ${ARTICLE_FIELDS}
+  query BlogArticles($blogHandle: String!, $first: Int!) {
+    blog(handle: $blogHandle) {
+      id
+      title
+      articles(first: $first, sortKey: PUBLISHED_AT, reverse: true) {
+        edges {
+          node {
+            ...ArticleFields
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const ARTICLE_BY_HANDLE_QUERY = /* GraphQL */ `
+  ${ARTICLE_FIELDS}
+  query ArticleByHandle($blogHandle: String!, $articleHandle: String!) {
+    blog(handle: $blogHandle) {
+      articleByHandle(handle: $articleHandle) {
+        ...ArticleFields
+      }
+    }
+  }
+`;
+
+/**
+ * Last-resort fallback when the configured/default blog handle doesn't
+ * resolve to an actual blog (e.g. a store whose blog isn't named
+ * "journal" and hasn't set SHOPIFY_BLOG_HANDLE) — see
+ * src/lib/shopify/journal.ts.
+ */
+export const FIRST_BLOG_HANDLE_QUERY = /* GraphQL */ `
+  query FirstBlogHandle {
+    blogs(first: 1) {
+      edges {
+        node {
+          handle
+        }
+      }
+    }
+  }
+`;

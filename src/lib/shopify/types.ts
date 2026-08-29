@@ -116,3 +116,43 @@ export type CartLinesUpdateResult = {
 export type CartLinesRemoveResult = {
   cartLinesRemove: { cart: ShopifyCart | null; userErrors: ShopifyUserError[] };
 };
+
+export type ShopifyArticleAuthor = {
+  name: string;
+};
+
+export type ShopifySeo = {
+  title: string | null;
+  description: string | null;
+};
+
+export type ShopifyArticle = {
+  id: string;
+  handle: string;
+  title: string;
+  excerpt: string | null;
+  contentHtml: string;
+  publishedAt: string;
+  authorV2: ShopifyArticleAuthor | null;
+  image: ShopifyImage | null;
+  seo: ShopifySeo | null;
+  tags: string[];
+};
+
+export type ShopifyBlogArticlesQueryResult = {
+  blog: {
+    id: string;
+    title: string;
+    articles: { edges: { node: ShopifyArticle }[] };
+  } | null;
+};
+
+export type ShopifyArticleByHandleQueryResult = {
+  blog: {
+    articleByHandle: ShopifyArticle | null;
+  } | null;
+};
+
+export type ShopifyFirstBlogQueryResult = {
+  blogs: { edges: { node: { handle: string } }[] };
+};
