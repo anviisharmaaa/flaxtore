@@ -26,6 +26,24 @@ const DEFAULT_BLOG_HANDLE = "journal";
 const WORDS_PER_MINUTE = 200;
 
 /**
+ * Storefront-only display override for an author name — Shopify's own
+ * Article.author record is never read from or written to here, and
+ * nothing in Shopify Admin changes. This only substitutes what visitors
+ * see on flaxtore.com; it's keyed by the actual Shopify author name, so
+ * it applies automatically to every existing and future article whose
+ * Shopify author is "Shaurya Mittal", and leaves any other author's name
+ * untouched.
+ */
+const AUTHOR_DISPLAY_OVERRIDES: Record<string, string> = {
+  "Shaurya Mittal": "Anvi Sharma",
+};
+
+function displayAuthorName(name: string | undefined): string | undefined {
+  if (!name) return name;
+  return AUTHOR_DISPLAY_OVERRIDES[name] ?? name;
+}
+
+/**
  * UI-facing shape /journal and /journal/[slug] render. Deliberately
  * mirrors the fields the previous local `JournalPost` (src/data/journal.ts,
  * now retired — see _to_delete/) exposed, plus the extra fields Shopify
@@ -68,7 +86,7 @@ function mapShopifyArticleToLocal(article: ShopifyArticle): JournalPost {
     excerpt,
     contentHtml: article.contentHtml,
     readTime: estimateReadTime(article.contentHtml),
-    author: article.authorV2?.name,
+    author: displayAuthorName(article.authorV2?.name),
     publishedAt: article.publishedAt,
     image: article.image?.url,
     imageAlt: article.image?.altText ?? article.title,
