@@ -6,6 +6,7 @@ import { Container } from "@/components/ui/Container";
 import { PlaceholderImage } from "@/components/ui/PlaceholderImage";
 import { Reveal } from "@/components/motion/Reveal";
 import { getShopifyJournalPosts, getShopifyJournalPostByHandle } from "@/lib/shopify/journal";
+import { siteConfig } from "@/config/site";
 
 /**
  * Same revalidation window as the listing page (see src/app/journal/page.tsx).
@@ -52,8 +53,43 @@ export default async function JournalPostPage(props: PageProps<"/journal/[slug]"
   const post = await getShopifyJournalPostByHandle(slug);
   if (!post) notFound();
 
+  // Article/BlogPosting structured data — same pattern as the Product
+  // JSON-LD on src/app/products/[slug]/page.tsx. Absolute URLs throughout
+  // (schema.org's own recommendation for `image`/`url`/`@id`), built from
+  // this app's own siteConfig.url, never from a Shopify-hosted URL.
+  const articleUrl = `${siteConfig.url}/journal/${post.slug}`;
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.seoDescription ?? post.excerpt,
+    image: post.image ? [post.image] : undefined,
+    datePublished: post.publishedAt,
+    dateModified: post.publishedAt,
+    author: post.author
+      ? { "@type": "Person", name: post.author }
+      : { "@type": "Organization", name: siteConfig.name },
+    publisher: {
+      "@type": "Organization",
+      name: siteConfig.name,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteConfig.url}${siteConfig.ogImage}`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": articleUrl,
+    },
+    url: articleUrl,
+  };
+
   return (
     <article className="pb-24 pt-32 md:pt-40">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       <Container className="max-w-3xl">
         <Link href="/journal" className="text-sm font-medium text-brand-700 hover:text-brand-900">
           ← Journal
